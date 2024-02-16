@@ -1,5 +1,13 @@
 # universal-remote
 
+### Use
+
+1. Scrape the Internet Movie Script Database with:
+    ```base
+    python src/script_scraper.py
+    ```
+    This will save `movie_scripts.csv` to `data/`.
+
 
 ### Development
 1. This project was built in Python 3.11.4. We recommend using Pyenv to manage Python installations.
