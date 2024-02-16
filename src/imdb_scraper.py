@@ -14,7 +14,7 @@ def get_synopsis(movie_title):
         print(f"{first_hit} ✓")
         return plot_outline
 
-    except (KeyError, IMDbDataAccessError):
+    except (KeyError, IMDbDataAccessError, TimeoutError):
         return ""
 
     
