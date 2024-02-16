@@ -2,7 +2,7 @@
 
 ### Use
 1. Scrape the all plot summaries from IMDB for each movie in the IM_S_DB with the following. It will save `movie_summaries.csv` to `data/`.
-    ```base
+    ```bash
     python get_movie_plot_outlines.py.py
     ```    
 
