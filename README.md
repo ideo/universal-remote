@@ -1,10 +1,9 @@
 # universal-remote
 
 ### Use
-
-1. Scrape the Internet Movie Script Database with the following. It will save `movie_scripts.csv` to `data/`.  
+1. Scrape the all plot summaries from IMDB for each movie in the IM_S_DB with the following. It will save `movie_summaries.csv` to `data/`.
     ```base
-    python src/script_scraper.py
+    python get_movie_plot_outlines.py.py
     ```    
 
 
