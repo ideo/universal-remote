@@ -2,11 +2,10 @@
 
 ### Use
 
-1. Scrape the Internet Movie Script Database with:
+1. Scrape the Internet Movie Script Database with the following. It will save `movie_scripts.csv` to `data/`.  
     ```base
     python src/script_scraper.py
-    ```
-    This will save `movie_scripts.csv` to `data/`.
+    ```    
 
 
 ### Development
