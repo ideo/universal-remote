@@ -20,3 +20,9 @@
     poetry add --group scraper [package-name]
     ```
     This will let us keep the dependencies separate and organized, as the scraper may only be needed temporarily.
+
+1. You can use Jupyter Notebooks with Poetry by creating a kernel like so:
+    ```bash
+    poetry run python -m ipykernel install --user --name [project-name]
+    ```
+    Start your notebooks with `poetry run jupyter lab` and select your newly created kernel.

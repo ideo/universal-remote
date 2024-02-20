@@ -13,6 +13,9 @@ plotly-express = "^0.4.1"
 transformers = "^4.37.2"
 sentence-transformers = "2.2.2"
 umap-learn = "^0.5.5"
+pyarrow = "^15.0.0"
+openai = "^1.12.0"
+python-dotenv = "^1.0.1"
 
 
 [tool.poetry.group.scraper.dependencies]
@@ -20,6 +23,11 @@ requests = "^2.31.0"
 beautifulsoup4 = "^4.12.3"
 cinemagoer = "^2023.5.1"
 tqdm = "^4.66.2"
+
+
+[tool.poetry.group.dev.dependencies]
+jupyterlab = "^4.1.2"
+ipykernel = "^6.29.2"
 
 [build-system]
 requires = ["poetry-core"]
