@@ -7,21 +7,19 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-requests = "^2.31.0"
-beautifulsoup4 = "^4.12.3"
 pandas = "^2.2.0"
-cinemagoer = "^2023.5.1"
 instructorembedding = "^1.0.1"
 plotly-express = "^0.4.1"
 transformers = "^4.37.2"
 sentence-transformers = "2.2.2"
 umap-learn = "^0.5.5"
+
+
+[tool.poetry.group.scraper.dependencies]
+requests = "^2.31.0"
+beautifulsoup4 = "^4.12.3"
+cinemagoer = "^2023.5.1"
 tqdm = "^4.66.2"
-
-
-[tool.poetry.group.dev.dependencies]
-streamlit = "^1.31.1"
-watchdog = "^4.0.0"
 
 [build-system]
 requires = ["poetry-core"]

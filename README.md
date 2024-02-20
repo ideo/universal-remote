@@ -14,3 +14,9 @@
     ```bash
     poetry export --without-hashes --format=requirements.txt > requirements.txt
     ```
+
+1. I have added all scraper dependencies with:
+    ```bash
+    poetry add --group scraper [package-name]
+    ```
+    This will let us keep the dependencies separate and organized, as the scraper may only be needed temporarily.
