@@ -8,7 +8,8 @@ import numpy as np
 import pandas as pd
 
 from src import DATA_DIR
-from src import script_database_scraper, imdb_scraper
+from src.script_scraper import imdb_scraper
+from src.script_scraper import script_database_scraper
 
 
 FILEPATH = DATA_DIR / "movie_summaries.csv"

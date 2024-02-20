@@ -1,5 +1,8 @@
-from src import DATA_DIR, script_database_scraper
+from src import DATA_DIR
+from src.script_scraper import Script_Scraper
 
 
 filepath = DATA_DIR / "seinfeld_scripts.csv"
-script_database_scraper.scrape_seinfeld_scripts(filepath)
+scraper = Script_Scraper()
+scraper.seinfeld(filepath)
+
