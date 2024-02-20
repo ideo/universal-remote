@@ -2,6 +2,7 @@ import transformers
 import sentence_transformers
 from InstructorEmbedding import INSTRUCTOR
 import pandas as pd
+import math
 
 # gets a single list of embeddings for one movie
 def get_embedding(text):
@@ -11,10 +12,12 @@ def get_embedding(text):
     return embedding
 
 # iterates through a data frame of movies to grab embeddings and returns dataframe with all info and embeddings
-# then saves as
+# then returns original data with embedding dimensions
 def embeddings_dataframe(movie_df):
+    movie_df = movie_df[(movie_df['Synopsis'] != '') & (movie_df['Synopsis'].notna())]  # remove all movies that don't have a synopsis
     temp_embeddings = []
     for plot in movie_df['Synopsis']:
+        print(plot)
         embedding_list = get_embedding(plot)
         temp_embeddings.append(embedding_list)
     temp_embeddings = pd.DataFrame([embeddings[0] for embeddings in temp_embeddings])
