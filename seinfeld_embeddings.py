@@ -35,9 +35,9 @@ def fetch_embeddings_api_call(source_text):
             input=source_text,
             model=LARGE_MODEL,
         )
+        return response
     except BadRequestError:
         return None
-
 
 
 def clean_script(script):
