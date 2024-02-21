@@ -4,6 +4,8 @@ from InstructorEmbedding import INSTRUCTOR
 import pandas as pd
 import umap
 import math
+import dotenv
+import openai
 
 # gets a single list of embeddings for one movie
 def get_embedding_instructor(text, model):
@@ -11,30 +13,43 @@ def get_embedding_instructor(text, model):
     embedding = model.encode([[instruction, text]])
     return embedding
 
-# def get_embedding_openai(text, model):
-# TODO!!!
+def get_embedding_openai(text, client):
+    embedding = client.embeddings.create(input = text, model = 'text-embedding-3-small').data[0].embedding
+    return embedding
 
 # iterates through a data frame of movies to grab embeddings and returns dataframe with all info and embeddings
 # then returns original data with embedding dimensions
-def embeddings_dataframe(movie_data):
-    # movie_data = movie_df[(movie_df['Synopsis'] != '') & (movie_df['Synopsis'].notna())]  # remove all movies that don't have a synopsis
-    model = INSTRUCTOR('hkunlp/instructor-xl')
+def embeddings_dataframe(movie_data, llm = 'instructor'):  # model can be instructor or openai
+    if llm == 'instructor':
+        model = INSTRUCTOR('hkunlp/instructor-xl')
+    elif llm == 'openai':
+        dotenv.load_dotenv()
+        model = openai.OpenAI()
 
     temp_embeddings = []
     for plot in movie_data['Synopsis']:
         print(plot)
-        if plot == '' or pd.isna(plot):
-            embedding_list = [[None]*768]
+        if plot == '' or pd.isna(plot):  # return list of nones if missing plot
+            if llm == 'instructor':
+                embedding_list = [[None]*768]
+            elif llm == 'openai':
+                embedding_list = [None]*768
         else:
-            embedding_list = get_embedding_instructor(plot, model)
-            # TODO: make openai/instructor an argument. will need to cat all lists of dims into another list and convert to dataframe
+            if llm == 'instructor':
+                embedding_list = get_embedding_instructor(plot, model)
+            elif llm == 'openai':
+                embedding_list = get_embedding_openai(plot, model)  # not done with this
+
         print(len(embedding_list))
         temp_embeddings.append(embedding_list)
 
-    try:
-        temp_embeddings = pd.DataFrame([embeddings[0] for embeddings in temp_embeddings])
-    except Exception as error:
-        print(error)
+    if llm == 'instructor':
+        try:
+            temp_embeddings = pd.DataFrame([embeddings[0] for embeddings in temp_embeddings])
+        except Exception as error:
+            print(error)
+    elif llm == 'openai':
+        temp_embeddings = pd.DataFrame(temp_embeddings)
 
     print("created embeddings dataframe")
 
