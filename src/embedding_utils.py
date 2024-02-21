@@ -48,18 +48,23 @@ def embeddings_dataframe(movie_data):
     return movie_data
 
 # once you have a dataframe from embeddings_dataframe, use this to reduce embedding dimensions
-def reduce_embeddings(embeddings_df, n_dim = 3, n_neighbors = 17, min_dist = 0.3, n_components = 3, random_state = None):
-    just_embeddings = embeddings_df.iloc[:,2:]
+def reduce_embeddings(embeddings_df, n_dim = 3, n_neighbors = 17, min_dist = 0.3, random_state = None):
+    just_embeddings = embeddings_df.filter(regex = 'dim')
 
     # TODO: turn this into a function where you can manipulate these params and get the combined df
     reduced_embeddings = umap.UMAP(n_neighbors = n_neighbors,  # 17 and 0.3 looked best so far
                                                min_dist = min_dist,
-                                               n_components = n,
+                                               n_components = n_dim,
                                                random_state = 433).\
         fit_transform(just_embeddings)
     reduced_embeddings = pd.DataFrame(reduced_embeddings)
 
-    reduced_df = pd.concat([embeddings_df.loc[0:1], reduced_embeddings])
-    reduced_df.columns = [embeddings_df.columns[0:1], 'dim1', 'dim2', 'dim3']
+    reduced_df = pd.concat([embeddings_df[['Movie Title', 'Movie URL', 'Synopsis']].reset_index(drop = True),
+                            reduced_embeddings.reset_index(drop = True)], axis = 1)
+    dims = ['dim' + str(dim + 1) for dim in range(n_dim)]
+    reduced_df.columns = ['Movie Title', 'Movie URL', 'Synopsis'] + dims
 
     return reduced_df
+
+def word_wrap(string, n_chars):
+    return '\n'.join(string[i:i+n_chars] for i in range(0, len(string), n_chars))
