@@ -55,7 +55,8 @@ def fetch_embeddings_api_call(source_text):
             input=source_text,
             model=SMALL_MODEL,
         )
-        return response
+        embedding = response.data[0].embedding
+        return embedding
     except BadRequestError:
         return None
 

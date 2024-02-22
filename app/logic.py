@@ -19,24 +19,29 @@ def load_seinfeld_embeddings():
 
 @st.cache_data
 def load_movie_summary_embeddings():
-    filepath = DATA_DIR / "movie_embeddings_openai.csv"
-    # filepath = DATA_DIR / "movie_summaries_LONG.csv"
-    df = pd.read_csv(filepath)
-
+    # filepath = DATA_DIR / "movie_embeddings_openai.csv"
+    # df = pd.read_csv(filepath)
+    filepath = DATA_DIR / "movie_synopses_embeddings.pkl"
+    df = pd.read_pickle(filepath)
+    
     # Reduce
     df.set_index("Movie Title", inplace=True)
-    
-    columns_to_drop = [
-        "Unnamed: 0.1", 
-        "Unnamed: 0", 
-        "Movie URL",
-        ]
-    df.drop(columns=columns_to_drop, inplace=True)
+    df.drop(columns=["Movie URL"], inplace=True)
     df.dropna(axis=0, inplace=True)
 
+    st.write(len(df.iloc[0]["Embeddings"]))  
+
     synopses = df["Synopsis"].copy()
-    embeddings = df.drop(columns=["Synopsis"])
+    embeddings = pd.DataFrame(df["Embeddings"].to_list(), index=df.index)
+
     return synopses, embeddings
+
+
+def extract_embedding(embedding_object, embedding_dimensions=1536):
+    if embedding_object is not None:
+        return embedding_object.data[0].embedding
+    else:
+        return [None]*embedding_dimensions
 
 
 def reduce_dimensions(embeddings_df, num_dimensions=20,
