@@ -63,7 +63,7 @@ def embeddings_dataframe(movie_data, llm = 'instructor'):  # model can be instru
     return movie_data
 
 # once you have a dataframe from embeddings_dataframe, use this to reduce embedding dimensions
-def reduce_embeddings(embeddings_df, n_dim = 3, n_neighbors = 17, min_dist = 0.3, random_state = None):
+def reduce_embeddings(embeddings_df, n_dim = 3, n_neighbors = 17, min_dist = 0.1, random_state = None):
     just_embeddings = embeddings_df.filter(regex = 'dim')
 
     # TODO: turn this into a function where you can manipulate these params and get the combined df
