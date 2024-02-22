@@ -15,7 +15,7 @@ with cntr:
 
 
 synopses, embeddings = lg.load_movie_summary_embeddings()
-embeddings = lg.reduce_dimensions(embeddings)
+embeddings = lg.reduce_dimensions(embeddings, num_dimensions=10)
 # st.write(embeddings.values[0])
 
 with st.expander("Movie Toggles"):

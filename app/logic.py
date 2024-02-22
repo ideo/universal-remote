@@ -19,8 +19,6 @@ def load_seinfeld_embeddings():
 
 @st.cache_data
 def load_movie_summary_embeddings():
-    # filepath = DATA_DIR / "movie_embeddings_openai.csv"
-    # df = pd.read_csv(filepath)
     filepath = DATA_DIR / "movie_synopses_embeddings.pkl"
     df = pd.read_pickle(filepath)
     
@@ -29,8 +27,7 @@ def load_movie_summary_embeddings():
     df.drop(columns=["Movie URL"], inplace=True)
     df.dropna(axis=0, inplace=True)
 
-    st.write(len(df.iloc[0]["Embeddings"]))  
-
+    # Split
     synopses = df["Synopsis"].copy()
     embeddings = pd.DataFrame(df["Embeddings"].to_list(), index=df.index)
 
@@ -71,7 +68,7 @@ def dimension_slider(embeddings, col_ii, descriptor):
     _min, _max = float(_min), float(_max)
     # starting_value = np.mean([_min, _max])
     starting_value = _min
-    st.slider(label=f"How {descriptor}?",
+    st.slider(label=f"How **{descriptor}** is the movie?",
               min_value=_min, max_value=_max,
               value=starting_value,
               key=f"dimension_slider_{col_ii}",
