@@ -11,7 +11,7 @@ st.set_page_config(page_icon="🎤",
                    layout="centered",)
 
 st.title("Seinfeld")
-df = lg.load_data()
+df = lg.load_seinfeld_embeddings()
 episodes = df.index.tolist()
 
 TREE = spatial.KDTree(df.values)
@@ -37,6 +37,9 @@ with cntr:
     # _sum = df.loc[ep1].values + df.loc[ep2].values
     v1, v2 = df.loc[ep1].values, df.loc[ep2].values
     _mean = np.mean(np.array([v1, v2]), axis=0)
+    print(_mean)
+    print(_mean.shape)
+    print(type(_mean))
     distances, indices = TREE.query(_mean, k=3)
     episode_names = [df.iloc[ii].name for ii in indices]
     episode_names = [ep for ep in episode_names if ep not in [ep1, ep2]]
