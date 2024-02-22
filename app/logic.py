@@ -20,11 +20,18 @@ def load_seinfeld_embeddings():
 @st.cache_data
 def load_movie_summary_embeddings():
     filepath = DATA_DIR / "movie_embeddings_openai.csv"
+    # filepath = DATA_DIR / "movie_summaries_LONG.csv"
     df = pd.read_csv(filepath)
 
     # Reduce
     df.set_index("Movie Title", inplace=True)
-    df.drop(columns=["Unnamed: 0.1", "Unnamed: 0", "Movie URL"], inplace=True)
+    
+    columns_to_drop = [
+        "Unnamed: 0.1", 
+        "Unnamed: 0", 
+        "Movie URL",
+        ]
+    df.drop(columns=columns_to_drop, inplace=True)
     df.dropna(axis=0, inplace=True)
 
     synopses = df["Synopsis"].copy()
@@ -57,7 +64,8 @@ def reduce_dimensions(embeddings_df, num_dimensions=20,
 def dimension_slider(embeddings, col_ii, descriptor):
     _min, _max = embeddings[col_ii].min(), embeddings[col_ii].max()
     _min, _max = float(_min), float(_max)
-    starting_value = np.mean([_min, _max])
+    # starting_value = np.mean([_min, _max])
+    starting_value = _min
     st.slider(label=f"How {descriptor}?",
               min_value=_min, max_value=_max,
               value=starting_value,
@@ -90,10 +98,7 @@ def parse_input_vector(embeddings):
     return vector
 
 
-def find_nearest_neighbors(tree, vector, n_neghbors=10):
-    search_vector = np.array(vector)
-    print(search_vector.shape)
-    print(search_vector)
-    print(type(search_vector))
-    neighbors = tree.query(search_vector, k=n_neghbors)
-    st.write(neighbors)
+def find_nearest_neighbors(tree, vector, embeddings, n_neighbors=10):
+    _, neighbors = tree.query(np.array(vector), k=n_neighbors)
+    movie_names = embeddings.iloc[neighbors].index
+    return movie_names
