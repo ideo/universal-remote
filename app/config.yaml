@@ -22,7 +22,7 @@ How to Improve Upon This:
 - This prototype was built in a few days with publicly available data. The time spent building a professional quality, final product would be spent curating better data and deriving stronger, more distinct dimensions.
 
 Better Data:
-- Publicly available, user-generated plot summaries are of, to be generous, inconsistent quality. Curating a collection of critic reviews and professional-quality plot summaries would enhance the patterns the model can find and lead to a richer overall experience.
+- Publicly available, user-generated plot summaries are, to be generous, of inconsistent quality. Curating a collection of critic reviews and professional-quality plot summaries would enhance the patterns the model can find and lead to a richer overall experience.
 
 Better Spectrums:
 - This first pass produced spectrums that, at times, have a bit too much similarity for our liking. For example, many dimensions picked up on the difference between fantastical vs. realistic settings. We’ve already begun discussion different mathematical techniques that we think could produce more distinct categories.
