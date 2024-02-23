@@ -67,7 +67,7 @@ def dimension_slider(embeddings, col_ii, descriptor):
     _min, _max = embeddings[col_ii].min(), embeddings[col_ii].max()
     _min, _max = float(_min), float(_max)
     starting_value = np.mean([_min, _max])
-    st.slider(label=f"How **{descriptor}** is the movie?",
+    st.slider(label=descriptor,
               min_value=_min, max_value=_max,
               value=starting_value,
               key=f"dimension_slider_{col_ii}",

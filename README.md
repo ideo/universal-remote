@@ -1,5 +1,7 @@
 # universal-remote
 
+This project is an exploration of how to use LLMs to make searching for movie recommendations easier and more natural.
+
 ### Use
 1. Scrape the all plot summaries from IMDB for each movie in the IM_S_DB with the following. It will save `movie_summaries.csv` to `data/`.
     ```bash
@@ -13,6 +15,10 @@
 1. We use [Poetry](https://python-poetry.org/docs/master/#installation) to manage dependencies, but we have included a `requirements.txt` file as well. Ask poetry to output a `requirements.txt` file for you with:
     ```bash
     poetry export --without-hashes --format=requirements.txt > requirements.txt
+    ```
+    or, to specifically only export the ones required for the demo app, run:
+    ```bash
+    poetry export --without-hashes --only app --format=requirements.txt > requirements.txt
     ```
 
 1. I have added all scraper dependencies with:
