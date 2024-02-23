@@ -95,6 +95,7 @@ I want a movie that's like Finding Nemo but a tiny bit like Rush Hour
 
 Give me a cross between Robocop and Marley & Me
 Give me the love child of American Psycho and The Matrix
+Give me the love child of Finding Nemo and Robocop
 
 back to the future x goonies
 zach: robocop x care bears
