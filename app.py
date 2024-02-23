@@ -17,7 +17,7 @@ with cntr:
 synopses, embeddings = lg.load_movie_summary_embeddings()
 embeddings = lg.reduce_dimensions(embeddings, num_dimensions=10)
 
-with st.expander("Movie Toggles"):
+with st.expander("Movie Toggles", expanded=True):
     col1, col2 = st.columns(2)
     for col_ii in embeddings.columns:
         descriptors = lg.load_dimension_descriptors()

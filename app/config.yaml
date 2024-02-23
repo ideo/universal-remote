@@ -1,21 +1,14 @@
 dimension descriptors:
-  0:  DESCRIPTkslj;af
-  1:  asdfasdf
-  2:  asdfasdfsd
-  3:  DESCRIPTOR
-  4:  DESCRIPTOR
-  5:  DESCRIPTOR
-  6:  DESCRIPTOR
-  7:  DESCRIPTOR
-  8:  DESCRIPTOR
-  9:  DESCRIPTOR
-  10: DESCRIPTOR
-  11: DESCRIPTOR
-  12: DESCRIPTOR
-  13: DESCRIPTOR
-  14: DESCRIPTOR
-  15: DESCRIPTOR
-  16: DESCRIPTOR
-  17: DESCRIPTOR
-  18: DESCRIPTOR
-  19: DESCRIPTOR 
+  0:  How **Fantastical or Realistic** is the movie?
+  1:  A journey of **exploring the world vs. explorling yourself**?
+  2:  "**Child-Friendly or Rated-R**"
+  3:  "**Surreal and Fantastical vs. Supernatural and Paranormal**"
+  4:  Is the challenge of the movie driven by **a moral delimma or a mystery to solve**?
+  5:  How **Character-Driven vs. Concept-Driven** is the plot?
+  6:  A **profound pyschological challenge or a adventurous, action-packed journey**?
+  7:  "**Internal or Existential vs. External or Survivalist**"
+  8:  How **Heroic, Militiaristic, or Straightforward vs. Satrical, Creative, or Complex** is the storyline? 
+  9:  "**Ghostly, Suspenseful, Horrorific vs. Satirical, Human-centric, or Social Commentary**"
+
+
+introduction: Welcome to 
