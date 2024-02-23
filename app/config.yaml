@@ -5,10 +5,24 @@ dimension descriptors:
   3:  "**Surreal and Fantastical vs. Supernatural and Paranormal**"
   4:  Is the challenge of the movie driven by **a moral delimma or a mystery to solve**?
   5:  How **Character-Driven vs. Concept-Driven** is the plot?
-  6:  A **profound pyschological challenge or a adventurous, action-packed journey**?
+  6:  A **profound pyschological challenge or an adventurous, action-packed journey**?
   7:  "**Internal or Existential vs. External or Survivalist**"
   8:  How **Heroic, Militiaristic, or Straightforward vs. Satrical, Creative, or Complex** is the storyline? 
   9:  "**Ghostly, Suspenseful, Horrorific vs. Satirical, Human-centric, or Social Commentary**"
 
 
-introduction: Welcome to 
+introduction:
+- Welcome to our proof-of-concept prototype demonstrating how Large Language Models (LLMs) can be used under the hood to build search tools structured around how people talk about movies and TV shows.
+
+How it Works:
+- We scraped user-written plot summaries from IMDB of roughly 1100 movies and TV shows. We then used an OpenAI LLM to derive embeddings – the measurements of how text samples relate to one another – for each plot summary. These embeddings have been decomposed into ten spectrums, which we also interrogated using the help of OpenAI’s models.
+- Adjust the spectrum sliders below to explore the movies and shows the tool has learned.
+
+How to Improve Upon This:
+- This prototype was built in a few days with publicly available data. The time spent building a professional quality, final product would be spent curating better data and deriving stronger, more distinct dimensions.
+
+Better Data:
+- Publicly available, user-generated plot summaries are of, to be generous, inconsistent quality. Curating a collection of critic reviews and professional-quality plot summaries would enhance the patterns the model can find and lead to a richer overall experience.
+
+Better Spectrums:
+- This first pass produced spectrums that, at times, have a bit too much similarity for our liking. For example, many dimensions picked up on the difference between fantastical vs. realistic settings. We’ve already begun discussion different mathematical techniques that we think could produce more distinct categories.

@@ -10,6 +10,22 @@ from src.directories import DATA_DIR, EMBEDDINGS_DIR, APP_DIR
 from app import utils
 
 
+def write_text(config, section_title, header_level=3):
+    if header_level is not None:
+        size = "#"*header_level
+        st.markdown(f"{size} {section_title}")
+
+    # config = load_config_file()
+    for paragraph in config[section_title]:
+        st.write(paragraph)
+
+
+def load_config_file():
+    filepath = APP_DIR / "config.yaml"
+    config = utils.load_yaml_file(filepath)
+    return config
+
+
 def load_seinfeld_embeddings():
     filepath = DATA_DIR / "seinfeld_embedding_vectors.pkl"
     df = pd.read_pickle(filepath)
@@ -74,9 +90,7 @@ def dimension_slider(embeddings, col_ii, descriptor):
               format="")
     
 
-def load_dimension_descriptors():
-    filepath = APP_DIR / "config.yaml"
-    config = utils.load_yaml_file(filepath)
+def load_dimension_descriptors(config):
     descriptors = config["dimension descriptors"]
     return descriptors
 
