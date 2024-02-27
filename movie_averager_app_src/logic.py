@@ -13,7 +13,7 @@ def load_movie_summary_embeddings():
 
     # Reduce
     df.set_index("Movie Title", inplace=True)
-    df.drop(columns=["Movie URL"], inplace=True)  # TODO: this might break w PCA
+    df.drop(columns=["Movie URL"], inplace=True)
     df.dropna(axis=0, inplace=True)
 
     # Split
@@ -31,7 +31,14 @@ def load_movie_principal_components():
 
     return synopses, pca
 
-
+def clean_movie_string(title):
+    title = title.lower()
+    cleaned_title_options = [title]  # it could appear normally with the leading "the"
+    the_split = title.split('the ')
+    if the_split[0] == '':  # if the movie starts with "the", here are some alternative ways it might appear in imdb:
+        cleaned_title_options.append('the '.join(the_split[1:]) + ', the')  # comma "the"
+        cleaned_title_options.append('the '.join(the_split[1:]))  # without leading "the"
+    return cleaned_title_options
 
 class Bot:
     def __init__(self, advanced = False):
@@ -40,11 +47,14 @@ class Bot:
         if self.advanced:
             synopses, pca = load_movie_principal_components()
             self.pca = pca
+            self.pca.index = self.pca.index.str.lower()  # make the titles lowercase for easier search
             pca_melted = pca.reset_index()
             self.pca_melted = pd.melt(pca_melted, id_vars = ['Movie Title'], var_name = 'pc', value_name = 'value')
             self.pca_melted['abs_value'] = self.pca_melted['value'].apply(lambda x: abs(x))
         else:
             synopses, embeddings = load_movie_summary_embeddings()
+            synopses.index = synopses.index.str.lower()  # make the titles lowercase for easier search
+            embeddings.index = embeddings.index.str.lower()
             self.embeddings = embeddings
             embeddings_df = pd.concat([synopses, embeddings], axis=1)
             self.embeddings_df = embeddings_df[embeddings_df[0].notna()]  # select movies where dims are known
@@ -53,12 +63,16 @@ class Bot:
 
 
     def average_embeddings(self, dict_list):
+        titles = [item['movie'] for item in dict_list]
+
         if self.advanced:  # averages only across most notable PCs for each movie
-            titles = [item['movie'] for item in dict_list]
-            rows = [self.pca[self.pca.index == item['movie']] for item in dict_list]
-            melted_rows = [self.pca_melted[self.pca_melted['Movie Title'] == item['movie']] for item in dict_list]
+            # TODO: implement fuzzy search
+            rows = self.pca.loc[[spelling_option for item in dict_list for
+                                 spelling_option in clean_movie_string(item['movie'])
+                                 if spelling_option in self.pca.index]]
+            melted_rows = [self.pca_melted[self.pca_melted['Movie Title'].isin(clean_movie_string(item['movie']))] for item in dict_list]
             melted_rows = pd.concat(melted_rows)
-            if len([row for row in rows if row.empty]) > 0:  # make sure at least one movie was identified in our data
+            if len(rows) < 2:  # make sure at least one movie was identified in our data
                 raise Exception('less than 2 of the movies you mentioned were identified in our database!')
             weights = [item['weight'] for item in dict_list]
 
@@ -70,7 +84,7 @@ class Bot:
 
             # then, select only the intersection of the PCs where all the movies are most extreme
             pcas_to_consider = list(set(extreme_pcas_per_movie['pc']))
-            relevant_query_rows = pd.concat(rows)[pcas_to_consider]
+            relevant_query_rows = rows[pcas_to_consider]
             all_relevant_rows = self.pca[pcas_to_consider]
 
             # then average the movies (weighted) over those dimensions only
@@ -79,13 +93,13 @@ class Bot:
             distances, indices = TREE.query(_mean, k=5)
             indices = indices.tolist()
             movie_names = [all_relevant_rows.index[ii] for ii in indices]
-            movie_names = [ep for ep in movie_names if ep not in titles]
+            movie_names = [ep for ep in movie_names if ep not in [option for title in titles for option in clean_movie_string(title)]]
 
         else:  # average two movies and return closest suggestion
-            # TODO: right now we are assuming that everything is spelled the same way as in the database
-            titles = [item['movie'] for item in dict_list]
-            rows = [self.embeddings[self.embeddings_df.index == item['movie']] for item in dict_list]
-            if len([row for row in rows if row.empty]) > 0:  # make sure at least one movie was identified in our data
+            rows = self.embeddings.loc[[spelling_option for item in dict_list for  # TODO: needs testing
+                                 spelling_option in clean_movie_string(item['movie'])
+                                 if spelling_option in self.embeddings.index]]
+            if len(rows) < 2:  # make sure at least one movie was identified in our data
                 raise Exception('less than 2 of the movies you mentioned were identified in our database!')
             weights = [item['weight'] for item in dict_list]
             # print(rows)
@@ -94,9 +108,9 @@ class Bot:
 
             TREE = spatial.KDTree(self.embeddings)
             distances, indices = TREE.query(_mean, k=5)
-            indices = indices.tolist()[0]
+            indices = indices.tolist()
             movie_names = [self.embeddings.index[ii] for ii in indices]
-            movie_names = [ep for ep in movie_names if ep not in titles]
+            movie_names = [ep for ep in movie_names if ep not in [option for title in titles for option in clean_movie_string(title)]]
 
         return movie_names
 
@@ -107,6 +121,7 @@ class Bot:
     def process_input(self, user_input = None):  # processes user's initial message
         if user_input is None:
             user_input = input('What would you like to watch today?')
+            # TODO: strip newlines so it doesn't crash
         self.messages.append(  # TODO: use ChatMessageHistory instead
             SystemMessage(content=
                           """ 
@@ -121,12 +136,19 @@ class Bot:
                             For instance, if the user says "I want to watch a movie like Movie A but a little more like Movie B", 
                             an appropriate weighting would be 0.8 for Movie A and 0.2 for Movie B.
                             Do not format response, output it in plain text.
+                            Redirect off-topic input if there is any.
                         """))
         self.messages.append(HumanMessage(content = user_input))
         response = self.bot.invoke(self.messages)
         self.messages.append(response)
-        print(response)
-        return eval(response.content)  # TODO: need to do some spelling deviation correction here. can we use movie titles embeddings / search for this?
+        try:  # verify that the bot outputs a list. it won't work if the user gives off-topic input
+            correct_output_type = type(eval(response.content)) == list
+            print(response)
+            return eval(response.content)
+        except:
+            print(response.content)  # if the bot outputs something that's not a list, print its response
+            return self.process_input()  # then try asking for input again
+
 
     # TODO: spit out the recs in plain language
     def give_recs(self, recs):
@@ -135,9 +157,11 @@ class Bot:
                 The input message is a Python list of movie titles. 
                 You are to recommend these movies in natural language based on their previous query.
                 Don't justify the recommendations, just offer them concisely.
+                Make sure the movies are properly capitalized in the output, since the input may not be.
+                Redirect off-topic input if there is any.
             """))
         self.messages.append(HumanMessage(content = str(recs)))
         response = self.bot.invoke(self.messages)
         self.messages.append(response)
-        # print(response)
-        return response.content
+        print(response.content)
+        # return response.content

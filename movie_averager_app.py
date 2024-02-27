@@ -28,4 +28,4 @@ testbot = lg.Bot(advanced = True)
 while True:
     init_response = testbot.process_input()
     recs_list = testbot.average_embeddings(init_response)
-    print(testbot.give_recs(recs_list))
+    testbot.give_recs(recs_list)
