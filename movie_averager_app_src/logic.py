@@ -138,8 +138,8 @@ class Bot:
 
 
     def process_input(self, user_input = None):  # processes user's initial message
-        if user_input is None:
-            user_input = input('What would you like to watch today?')
+        # if user_input is None:
+        #     user_input = input('What would you like to watch today?')
             # TODO: strip newlines so it doesn't crash
         self.messages.append(  # TODO: use ChatMessageHistory instead
             SystemMessage(content=
@@ -162,13 +162,14 @@ class Bot:
         self.messages.append(HumanMessage(content = user_input))
         response = self.bot.invoke(self.messages)
         self.messages.append(response)
-        try:  # verify that the bot outputs a list. it won't work if the user gives off-topic input
-            correct_output_type = type(eval(response.content)) == list
-            print(response)
-            return eval(response.content)
-        except:
-            print(response.content)  # if the bot outputs something that's not a list, print its response
-            return self.process_input()  # then try asking for input again
+        return response.content
+        # try:  # verify that the bot outputs a list. it won't work if the user gives off-topic input
+        #     correct_output_type = type(eval(response.content)) == list
+        #     print(response)
+        #     return eval(response.content)
+        # except:
+        #     print(response.content)  # if the bot outputs something that's not a list, print its response
+        #     return self.process_input()  # then try asking for input again
 
 
     # TODO: spit out the recs in plain language
@@ -184,5 +185,5 @@ class Bot:
         self.messages.append(HumanMessage(content = str(recs)))
         response = self.bot.invoke(self.messages)
         self.messages.append(response)
-        print(response.content)
-        # return response.content
+        # print(response.content)
+        return response.content
