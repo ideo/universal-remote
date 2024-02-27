@@ -76,24 +76,43 @@ class Bot:
                 raise Exception('less than 2 of the movies you mentioned were identified in our database!')
             weights = [item['weight'] for item in dict_list]
 
-            # for each movie, get the 2 PCs where the absolute value for the movie is highest
+            # for each movie, get the 2 PCs where the absolute value for the movie is highest (extremes)
             # note: there are 2 duplicate movies I think that are causing there to be 2 less groups than there are movies
             extreme_pcas_per_movie = (melted_rows.groupby(by='Movie Title').
                                       apply(lambda x: x.nlargest(2, 'abs_value')['pc']))
-            extreme_pcas_per_movie = pd.DataFrame(extreme_pcas_per_movie)
+            extreme_pcas_per_movie = pd.DataFrame(extreme_pcas_per_movie.reset_index(level = 1, drop = True))
+            extreme_pcas_per_movie = extreme_pcas_per_movie.reset_index().merge(melted_rows, how='left', on=['Movie Title', 'pc'])
 
-            # then, select only the intersection of the PCs where all the movies are most extreme
-            pcas_to_consider = list(set(extreme_pcas_per_movie['pc']))
-            relevant_query_rows = rows[pcas_to_consider]
-            all_relevant_rows = self.pca[pcas_to_consider]
+            # for each unique combo of movie and PC where there are extreme values across both movies,
+            # make a dataframe and get the PC values from the movies where that PC is a top 2 extreme for that movie.
+            # This can result in some NA values if the movies did not share the exact same extreme PCs.
+            # we will fill those NAs with the value of the same PC from the other movie, implying that we want
+            # a recommended movie that is as extreme in that dimension as the other movie.
+            pcas_to_consider = list(extreme_pcas_per_movie['pc'].unique())
+            special_mean_df = pd.MultiIndex.from_product([
+                list(extreme_pcas_per_movie['Movie Title'].unique()),
+                pcas_to_consider],
+                names = ['Movie Title', 'pc']).to_frame(index=False)
+            special_mean_df = pd.DataFrame(special_mean_df.merge(extreme_pcas_per_movie[['Movie Title', 'pc', 'value']], how = 'left'))
+            to_fill = special_mean_df[special_mean_df['value'].isnull()][['Movie Title', 'pc']]
+            to_fill['Movie Title'] = list(to_fill['Movie Title'][::-1])  # swap movie titles; index special_mean_df with this
+            to_fill = to_fill.merge(special_mean_df, 'left')
+            to_fill['Movie Title'] = list(to_fill['Movie Title'][::-1])
+            special_mean_df = special_mean_df.merge(to_fill.rename(columns={'value': 'value2'}), 'left')
+            special_mean_df['value'] = special_mean_df['value'].fillna(special_mean_df['value2'])
+            special_mean_df = special_mean_df.drop(columns = ['value2'])
+            special_mean_df = special_mean_df.pivot(index='Movie Title', columns='pc', values='value').sort_index(axis=1)
+
+            all_relevant_rows = self.pca[pcas_to_consider].sort_index(axis=1)
 
             # then average the movies (weighted) over those dimensions only
-            _mean = np.average(np.array(relevant_query_rows), weights=weights, axis=0)
+            _mean = np.average(np.array(special_mean_df), weights=weights, axis=0)
             TREE = spatial.KDTree(all_relevant_rows)
             distances, indices = TREE.query(_mean, k=5)
             indices = indices.tolist()
             movie_names = [all_relevant_rows.index[ii] for ii in indices]
             movie_names = [ep for ep in movie_names if ep not in [option for title in titles for option in clean_movie_string(title)]]
+
 
         else:  # average two movies and return closest suggestion
             rows = self.embeddings.loc[[spelling_option for item in dict_list for  # TODO: needs testing
@@ -135,6 +154,8 @@ class Bot:
                             words and adjust the weights accordingly.
                             For instance, if the user says "I want to watch a movie like Movie A but a little more like Movie B", 
                             an appropriate weighting would be 0.8 for Movie A and 0.2 for Movie B.
+                            You are only designed to process two movies at a time, so if the user mentions more than two movies,
+                            tell them you're not capable of this yet.
                             Do not format response, output it in plain text.
                             Redirect off-topic input if there is any.
                         """))

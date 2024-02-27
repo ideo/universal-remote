@@ -1,11 +1,8 @@
 import dotenv
 from movie_averager_app_src import logic as lg
+import streamlit
 
 dotenv.load_dotenv()
-
-# testbot = Bot(embeddings)
-# init_response = testbot.process_input("I want a movie that's a cross between Finding Nemo and Rush Hour")  # use the godfather to test spelling deviation correction
-# print(testbot.average_embeddings(init_response))
 
 """
 I want a movie that's like Finding Nemo but a little more like Rush Hour  # this one puts more weight on rush hour
