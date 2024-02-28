@@ -1,4 +1,5 @@
-import dotenv
+# import dotenv
+import os
 from movie_averager_app_src import logic as lg
 import streamlit as st
 
@@ -10,7 +11,8 @@ st.set_page_config(
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-dotenv.load_dotenv()
+# dotenv.load_dotenv()
+os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
 
 
 # I want a movie that's like Finding Nemo but a little more like Rush Hour  # this one puts more weight on rush hour
