@@ -89,15 +89,30 @@ class Bot:
             # we will fill those NAs with the value of the same PC from the other movie, implying that we want
             # a recommended movie that is as extreme in that dimension as the other movie.
             pcas_to_consider = list(extreme_pcas_per_movie['pc'].unique())
+            db_titles = list(extreme_pcas_per_movie['Movie Title'].unique())
             special_mean_df = pd.MultiIndex.from_product([
-                list(extreme_pcas_per_movie['Movie Title'].unique()),
+                db_titles,
                 pcas_to_consider],
                 names = ['Movie Title', 'pc']).to_frame(index=False)
             special_mean_df = pd.DataFrame(special_mean_df.merge(extreme_pcas_per_movie[['Movie Title', 'pc', 'value']], how = 'left'))
-            to_fill = special_mean_df[special_mean_df['value'].isnull()][['Movie Title', 'pc']]
+            to_fill = special_mean_df[special_mean_df['value'].isnull()][['Movie Title', 'pc']]  # just dims that are missing for each movie
             to_fill['Movie Title'] = list(to_fill['Movie Title'][::-1])  # swap movie titles; index special_mean_df with this
             to_fill = to_fill.merge(special_mean_df, 'left')
-            to_fill['Movie Title'] = list(to_fill['Movie Title'][::-1])
+            to_fill['Movie Title'] = list(to_fill['Movie Title'][::-1])  # swap them back after switching values
+
+            # now we need to consider the weighting of the movies
+            if weights[0] != 0.5:  # if the weighting of movies is not equal:
+                to_fill = to_fill.merge(melted_rows[['Movie Title', 'pc', 'value']].rename(columns = {'value':'orig_value'}))
+                if weights[0] > 0.5:  # if the first movie is weighted higher, move the new value slightly towards the second movie
+                    to_fill['value'] = to_fill.apply(
+                        lambda row: row['orig_value'] + 2 * (1 - weights[0]) * (row['value'] - row['orig_value']) if
+                        row['Movie Title'] == db_titles[0] else row['value'], axis=1)
+                if weights[1] > 0.5: # if the second movie is weighted higher, do the same for that movie
+                    to_fill['value'] = to_fill.apply(
+                        lambda row: row['orig_value'] + 2 * (1 - weights[1]) * (row['value'] - row['orig_value']) if
+                        row['Movie Title'] == db_titles[1] else row['value'], axis=1)
+
+
             special_mean_df = special_mean_df.merge(to_fill.rename(columns={'value': 'value2'}), 'left')
             special_mean_df['value'] = special_mean_df['value'].fillna(special_mean_df['value2'])
             special_mean_df = special_mean_df.drop(columns = ['value2'])
