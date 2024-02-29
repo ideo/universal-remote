@@ -41,7 +41,7 @@ def clean_movie_string(title):
     return cleaned_title_options
 
 class Bot:
-    def __init__(self, advanced = False):
+    def __init__(self, advanced = False, messages = []):
         self.bot = ChatOpenAI(model_name='gpt-4-turbo-preview')
         self.advanced = advanced
         if self.advanced:
@@ -59,7 +59,7 @@ class Bot:
             embeddings_df = pd.concat([synopses, embeddings], axis=1)
             self.embeddings_df = embeddings_df[embeddings_df[0].notna()]  # select movies where dims are known
         self.synopses = synopses
-        self.messages = []
+        self.messages = messages
 
 
     def average_embeddings(self, dict_list):
@@ -159,7 +159,8 @@ class Bot:
         self.messages.append(  # TODO: use ChatMessageHistory instead
             SystemMessage(content=
                           """ 
-                            Return a Python list of dictionaries. There should be one dictionary for each movie the user mentions. 
+                            You are helping to create "mashups" of two movies.
+                            Your job is to return a Python list of dictionaries. There should be one dictionary for each movie the user mentions. 
                             Each dictionary should have the following key/value pairs:
                             The value of the key "movie" should state a movie mentioned by the user, spelled exactly as the user did. 
                             The value of all of the "weight" keys should add up to 1. 
@@ -169,22 +170,27 @@ class Bot:
                             words and adjust the weights accordingly.
                             For instance, if the user says "I want to watch a movie like Movie A but a little more like Movie B", 
                             an appropriate weighting would be 0.8 for Movie A and 0.2 for Movie B.
-                            You are only designed to process two movies at a time, so if the user mentions more than two movies,
-                            tell them you're not capable of this yet.
+                            You are only designed to "mashup" two movies at a time. If the user wants you to do anything beyond this,
+                            tell them you're not capable yet, but this may be a feature in the future.
                             Do not format response, output it in plain text.
-                            Redirect off-topic input if there is any.
+                            If the user gives an off-topic or confusing request, you will need to output
+                            natural language to redirect the conversation or clarify their request.
+                            In this case, do so WITHOUT adding a list of dictionaries to the end of your message, 
+                            even as an example. 
+                            In a single message, you may either output
+                            a list of dictionaries or natural language, but never both. 
                         """))
         self.messages.append(HumanMessage(content = user_input))
         response = self.bot.invoke(self.messages)
         self.messages.append(response)
         return response.content
-        # try:  # verify that the bot outputs a list. it won't work if the user gives off-topic input
-        #     correct_output_type = type(eval(response.content)) == list
-        #     print(response)
-        #     return eval(response.content)
-        # except:
-        #     print(response.content)  # if the bot outputs something that's not a list, print its response
-        #     return self.process_input()  # then try asking for input again
+        try:  # verify that the bot outputs a list. it won't work if the user gives off-topic input
+            correct_output_type = type(eval(response.content)) == list
+            print(response)
+            return eval(response.content)
+        except:
+            print(response.content)  # if the bot outputs something that's not a list, print its response
+            return self.process_input()  # then try asking for input again
 
 
     # TODO: spit out the recs in plain language

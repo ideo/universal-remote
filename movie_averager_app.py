@@ -11,6 +11,10 @@ st.set_page_config(
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+if "ai_messages" not in st.session_state:
+    st.session_state.ai_messages = []
+# TODO: make sure chatbot's messages get preserved in its memory
+
 # dotenv.load_dotenv()
 os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
 
@@ -28,6 +32,8 @@ os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
 #
 # back to the future x goonies
 # zach: robocop x care bears
+
+# Give me the next best thing to Mission Impossible and Ocean's Eleven that are not British
 
 _, cntr, _ = st.columns([2,7,2])
 with cntr:
@@ -59,6 +65,7 @@ with right:
         with bot_interface.chat_message('user'):
             st.markdown(input_text)
             st.session_state.messages.append({"role": "user", "content": input_text})
+            st.session_state.ai_messages = testbot.messages
         init_response = testbot.process_input(user_input = input_text)
 
         try:  # verify that the bot outputs a list
@@ -73,10 +80,14 @@ with right:
             with bot_interface.chat_message('assistant'):
                 st.markdown(natural_language_recs)
                 st.session_state.messages.append({"role": "assistant", "content": natural_language_recs})
+                st.session_state.ai_messages = testbot.messages
         else:  # if not, because the user gives off-topic input, write the bot's "error" message to screen
             with bot_interface.chat_message('assistant'):
                 st.markdown(init_response)
                 st.session_state.messages.append({"role": "assistant", "content": init_response})
+                st.session_state.ai_messages = testbot.messages
+
+st.write(testbot.messages)
 
 _, cntr, _ = st.columns([2, 7, 2])
 with cntr:
@@ -92,9 +103,9 @@ with cntr:
         often results in recommendations that aren't related to either movie), but rather they want to mash up the most 
         distinctive features of each one. 
         
-        The conversational bot itself is powered with GPT--in this case it is relying on our small database of 
+        The conversational bot itself is powered with GPT-4--in this case it is relying on our small database of 
         knowledge rather than the encyclopedic knowledge that ChatGPT has access to. When you tell it "I want a movie 
-        that's a like A but a little bit like B", the AI is interpreting your wording to decide to how to weight the 
+        that's a like A but a little bit like B", the GPT is interpreting your wording to decide to how to weight the 
         movies when mashing up their key features.
     """)
     with st.expander("More mathematical details here...", expanded=False):
@@ -106,19 +117,25 @@ with cntr:
             movies, such as the degree of realism, degree of action, degree of romance etc. Then, for each movie in a 
             user's query, we only look at the 2 features where that movie has the largest absolute value (i.e. a feature 
             where that particular movie is more of an outlier), find the point where those key features intersect, and 
-            look for recommendations that exist in that space. If the two movies in the user query share any "key 
+            look for recommendations around that point in space. If the two movies in the user query share any "key 
             features", we take the average between those. If one movie is weighted more heavily than the other, we 
-            moderate the combination of the key features in proportion to the weights.
+            moderate the combination of the key features in proportion to the weights. Then we return the closest handful 
+            of movies to this point in space.
         """)
     st.subheader('How this prototype could improve')
     st.write("""
         If we were to have used the full scripts for each of these movies, the embeddings would account
         for much more detail, and the recommendations would probably be much more accurate. There are other ways we
         could use AI to analyze the scripts and map out the movies in more dimensions—for instance, using AI to 
-        identify how many murders are in each movie, or how many characters there are.
+        identify how many murders are in each movie, or how many female characters there are, and then using those as potential 
+        dimensions for mashing up movies. Of course, we would also expect to get more relevant recommendations 
+        if our database consisted of more movies!
         
-        Additionally, we would expect the recommendations to be better if our database consisted of more movies. 
-        But I guess the quality of recommendations is up to you to decide!
+        There are many more subtleties that could be explored in terms of the bot's ability to understand user requests. 
+        For instance, adding more data on each individual movie would allow users to add a filter to their query. We 
+        could also find ways to mathematize a statement like "I want a movie that's similar to A but not like B".
+        
+        
     """)
 
 
