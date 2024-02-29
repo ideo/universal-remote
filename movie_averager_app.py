@@ -87,7 +87,7 @@ with right:
                 st.session_state.messages.append({"role": "assistant", "content": init_response})
                 st.session_state.ai_messages = testbot.messages
 
-st.write(testbot.messages)
+# st.write(testbot.messages)
 
 _, cntr, _ = st.columns([2, 7, 2])
 with cntr:
